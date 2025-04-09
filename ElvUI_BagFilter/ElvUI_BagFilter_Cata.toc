@@ -1,0 +1,15 @@
+## Interface: 40401
+## Title: |cff1784d1ElvUI|r |cfd9b9b9bCataclysm|r Bag Filters
+## Version: v8.6
+## Author: Warmexx [Neighbours]
+## Dependencies: ElvUI
+## X-Date: 2024-11-03T09:10:21Z
+## X-Donate: PayPal:warmexx AT wow-neighbours DOT com
+## X-Website: https://github.com/warmexx/elvui-bag-filters
+## X-Curse-Project-ID: 49767
+## X-WoWI-ID: 26030
+## X-Wago-ID: WL6JJj6v
+
+Cata\ItemClass.lua
+
+Core\Load.xml

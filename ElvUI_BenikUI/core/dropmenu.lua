@@ -1,0 +1,179 @@
+-- BenikUI
+-- Edit ElvUI dropdown.lua to make a steady dropup menu. The menu position is not related anymore on where the mouse is clicked.
+-- args: menuList, menuFrame, parentButtonName, position, xOffset, yOffset, delay
+local BUI, E, L, V, P, G = unpack((select(2, ...)))
+local tinsert, unpack = table.insert, unpack
+
+local PADDING = 10
+local BUTTON_HEIGHT = 16
+local BUTTON_WIDTH = 135
+local counter = 0
+local hoverVisible = false
+
+local CreateFrame, ToggleFrame = CreateFrame, ToggleFrame
+local UIFrameFadeOut, UIFrameFadeIn, UISpecialFrames = UIFrameFadeOut, UIFrameFadeIn, UISpecialFrames
+local IsAddOnLoaded = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
+
+local classColor = E:ClassColor(E.myclass, true)
+local Garrison_OnClick = GarrisonLandingPageMinimapButton_OnClick
+
+local PlayerSpellsUtil = _G.PlayerSpellsUtil
+local UIParentLoadAddOn = UIParentLoadAddOn
+
+BUI.MenuList = {
+	{text = _G.CHARACTER_BUTTON, func = function() ToggleCharacter("PaperDollFrame") end},
+	{text = _G.SPELLBOOK_BUTTON, func = function() if PlayerSpellsUtil then PlayerSpellsUtil.ToggleSpellBookFrame() else ToggleFrame(_G.SpellBookFrame) end end},
+	{text = _G.PROFESSIONS_BUTTON, func = function() _G.ToggleProfessionsBook() end },
+	{text = _G.TALENTS_BUTTON, func = function() if PlayerSpellsUtil then PlayerSpellsUtil.ToggleClassTalentFrame() else _G.ToggleTalentFrame() end end},
+	{text = _G.LFG_TITLE, func = function() ToggleLFDParentFrame() end},
+	{text = _G.ACHIEVEMENT_BUTTON, func = function() ToggleAchievementFrame() end},
+	{text = _G.REPUTATION, func = function() ToggleCharacter('ReputationFrame') end},
+	{text = _G.GARRISON_TYPE_8_0_LANDING_PAGE_TITLE, func = function()
+		if Garrison_OnClick then Garrison_OnClick(_G.GarrisonLandingPageMinimapButton) else _G.ExpansionLandingPageMinimapButton:ToggleLandingPage() end
+	end},
+	{text = _G.COMMUNITIES_FRAME_TITLE, func = function() ToggleGuildFrame() end},
+	{text = L["Calendar"], func = function() GameTimeFrame:Click() end},
+	{text = _G.MOUNTS, func = function() ToggleCollectionsJournal(1) end},
+	{text = _G.PET_JOURNAL, func = function() ToggleCollectionsJournal(2) end},
+	{text = _G.TOY_BOX, func = function() ToggleCollectionsJournal(3) end},
+	{text = _G.HEIRLOOMS, func = function() ToggleCollectionsJournal(4) end},
+	{text = _G.WARDROBE, func = function() ToggleCollectionsJournal(5) end},
+	{text = _G.MACROS, func = function() UIParentLoadAddOn("Blizzard_MacroUI") MacroFrame_Show() end},
+	{text = _G.TIMEMANAGER_TITLE, func = function() ToggleFrame(TimeManagerFrame) end},
+	{text = _G.ADVENTURE_JOURNAL, func = function() if not IsAddOnLoaded('Blizzard_EncounterJournal') then EncounterJournal_LoadUI(); end ToggleFrame(EncounterJournal) end},
+	{text = _G.SOCIAL_BUTTON, func = function() ToggleFriendsFrame() end},
+	{text = _G.MAINMENU_BUTTON,
+	func = function()
+		if ( not GameMenuFrame:IsShown() ) then
+			CloseMenus();
+			CloseAllWindows()
+			ShowUIPanel(GameMenuFrame);
+		else
+			HideUIPanel(GameMenuFrame);
+			MainMenuMicroButton:SetButtonState("NORMAL");
+		end
+	end},
+	{text = _G.HELP_BUTTON, func = function() ToggleHelpFrame() end},
+}
+
+local function sortFunction(a, b)
+	return a.text < b.text
+end
+
+table.sort(BUI.MenuList, sortFunction)
+
+local function OnClick(btn)
+	local parent = btn:GetParent()
+	btn.func()
+	UIFrameFadeOut(parent, 0.3, parent:GetAlpha(), 0)
+	parent.fadeInfo.finishedFunc = function() parent:Hide() end
+end
+
+local function OnEnter(btn)
+	E:UIFrameFadeIn(btn.hoverTex, .3, 0, 1)
+	hoverVisible = true
+end
+
+local function OnLeave(btn)
+	E:UIFrameFadeOut(btn.hoverTex, .3, 1, 0)
+	hoverVisible = false
+end
+
+-- added parent, removed the mouse x,y and set menu frame position to any parent corners.
+-- Also added delay to autohide
+function BUI:Dropmenu(list, frame, parent, pos, xOffset, yOffset, delay, addedSize)
+	local db = E.db.benikui.colors.gameMenuColor
+	
+	local r, g, b = 0, 0, 0
+	if db == 1 then
+		r, g, b = classColor.r, classColor.g, classColor.b
+	elseif db == 2 then
+		r, g, b = BUI:unpackColor(E.db.benikui.colors.customGameMenuColor)
+	elseif db == 3 then
+		r, g, b = unpack(E.media.rgbvaluecolor)
+	end
+
+	if not frame.buttons then
+		frame.buttons = {}
+		frame:SetFrameStrata('DIALOG')
+		frame:SetClampedToScreen(true)
+		frame:SetParent(parent)
+		tinsert(_G.UISpecialFrames, frame:GetName())
+		frame:Hide()
+	end
+
+	xOffset = xOffset or 0
+	yOffset = yOffset or 0
+
+	for i=1, #frame.buttons do
+		frame.buttons[i]:Hide()
+	end
+
+	for i=1, #list do
+		if not frame.buttons[i] then
+			frame.buttons[i] = CreateFrame('Button', nil, frame)
+
+			frame.buttons[i].hoverTex = frame.buttons[i]:CreateTexture(nil, 'OVERLAY')
+			frame.buttons[i].hoverTex:SetAllPoints()
+			frame.buttons[i].hoverTex:SetTexture(E.Media.Textures.Highlight)
+			frame.buttons[i].hoverTex:SetBlendMode('BLEND')
+			frame.buttons[i].hoverTex:SetDrawLayer('BACKGROUND')
+			frame.buttons[i].hoverTex:SetAlpha(0)
+
+			frame.buttons[i].text = frame.buttons[i]:CreateFontString(nil, 'BORDER')
+			frame.buttons[i].text:SetAllPoints()
+			frame.buttons[i].text:FontTemplate()
+			frame.buttons[i].text:SetJustifyH('LEFT')
+
+			frame.buttons[i]:SetScript('OnEnter', OnEnter)
+			frame.buttons[i]:SetScript('OnLeave', OnLeave)
+		end
+
+		frame.buttons[i]:Show()
+		frame.buttons[i]:Height(BUTTON_HEIGHT)
+		frame.buttons[i]:Width(BUTTON_WIDTH + (addedSize or 0))
+		frame.buttons[i].text:SetText(list[i].text)
+		frame.buttons[i].text:SetTextColor(r, g, b)
+		frame.buttons[i].hoverTex:SetVertexColor(r, g, b)
+		frame.buttons[i].func = list[i].func
+		frame.buttons[i]:SetScript('OnClick', OnClick)
+
+		if i == 1 then
+			frame.buttons[i]:Point('TOPLEFT', frame, 'TOPLEFT', PADDING, -PADDING)
+		else
+			frame.buttons[i]:Point('TOPLEFT', frame.buttons[i-1], 'BOTTOMLEFT')
+		end
+	end
+
+	frame:SetScript('OnShow', function(self)
+		UIFrameFadeIn(self, 0.2, self:GetAlpha(), 1)
+	end)
+
+	frame:SetScript('OnUpdate', function(self, elapsed)
+		if hoverVisible then return end
+		counter = counter + elapsed
+		if counter >= delay then
+			UIFrameFadeOut(self, 0.3, self:GetAlpha(), 0)
+			self.fadeInfo.finishedFunc = function() self:Hide() end
+			counter = 0
+		end
+	end)
+
+	frame:Height((#list * BUTTON_HEIGHT) + PADDING * 2)
+	frame:Width(BUTTON_WIDTH + PADDING * 2 + (addedSize or 0))
+	frame:BuiStyle('Outside')
+	frame:ClearAllPoints()
+	frame:SetFrameStrata('DIALOG')
+
+	if pos == 'tLeft' then
+		frame:Point('BOTTOMRIGHT', parent, 'TOPLEFT', xOffset, yOffset)
+	elseif pos == 'tRight' then
+		frame:Point('BOTTOMLEFT', parent, 'TOPRIGHT', xOffset, yOffset)
+	elseif pos == 'bLeft' then
+		frame:Point('TOPRIGHT', parent, 'BOTTOMLEFT', xOffset, yOffset)
+	elseif pos == 'bRight' then
+		frame:Point('TOPLEFT', parent, 'BOTTOMRIGHT', xOffset, yOffset)
+	end
+
+	ToggleFrame(frame)
+end

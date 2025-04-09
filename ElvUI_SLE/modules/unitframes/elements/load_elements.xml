@@ -1,0 +1,8 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file='health.lua'/>
+	<Script file='power.lua'/>
+	<Script file='classbars.lua'/>
+	<Script file='DeathIndicator.lua'/>
+	<Script file='OfflineIndicator.lua'/>
+	<Script file='PvPIconText.lua'/>
+</Ui>

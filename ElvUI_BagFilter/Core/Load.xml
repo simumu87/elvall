@@ -1,0 +1,7 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="Strings.lua" />
+  <Script file="Options.lua" />
+  <Script file="IconSelector.lua" />
+  <Script file="BagFilter.lua" />
+  <Frame name="BagFilterPopupFrame" mixin="BagFilterPopupFrameMixin" inherits="IconSelectorPopupFrameTemplate" toplevel="true" frameStrata="HIGH" movable="true" enableMouse="true" hidden="true" />
+</Ui>
