@@ -1,0 +1,16 @@
+## Interface: 110100
+## Title: SimuUI
+## Notes: Simulated UI Enhancements
+## Author: You
+## Version: 1.0.0
+## SavedVariables: SimuUIDB
+
+SimuUI.lua
+config.lua
+core.lua
+
+Options/options.lua
+Options/commands.lua
+
+Modules/KeyStyle.lua
+Modules/QuickFocus.lua
