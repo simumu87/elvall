@@ -1,0 +1,12 @@
+## Interface: 100207
+## Title: SimuUI
+## Notes: Modular UI for WoW
+## Author: simumu
+## SavedVariables: SimuUIDB
+
+SimuUI.lua
+core.lua
+Options/commands.lua
+Options/options.lua
+Modules/KeyStyle.lua
+Modules/QuickFocus.lua
