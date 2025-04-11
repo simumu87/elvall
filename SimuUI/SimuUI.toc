@@ -1,12 +1,12 @@
-## Interface: 100207
+## Interface: 110100
 ## Title: SimuUI
-## Notes: Modular UI for WoW
-## Author: simumu
+## Notes: Simulated UI Enhancements
+## Author: You
+## Version: 1.0.0
 ## SavedVariables: SimuUIDB
 
-SimuUI.lua
 core.lua
-Options/commands.lua
-Options/options.lua
-Modules/KeyStyle.lua
-Modules/QuickFocus.lua
+Modules\KeyStyle.lua
+Modules\QuickFocus.lua
+Options\options.lua
+Init.lua
